@@ -22,10 +22,24 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+       const db = client.db('foodShare')
+       const foodCollection = db.collection('food')
+
+      //  save a foodData in db
+      app.post('/add-food',async(req, res) =>{
+        const foodData = req.body;
+        const result = await foodCollection.insertOne(foodData);
+        console.log(result);
+        res.send(result)
+      })
+
+      // get all food data from db
+      
+
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
