@@ -35,9 +35,21 @@ async function run() {
 
       // get all food data from db
       app.get('/food', async (req, res) => {
-        const result = await foodCollection.find().toArray()
-        res.send(result)
-      })
+        const sortBy = req.query.sortBy; // Sorting Parameter from client
+        let sortOption = {};
+      
+        if (sortBy === "expiry") {
+          sortOption = { expireDate: 1 }; // 1 = Ascending Order (Oldest First)
+        }
+      
+        foodCollection.find().sort(sortOption).toArray()
+          .then(result => res.send(result))
+          .catch(error => {
+            console.error("Error fetching food data:", error);
+            res.status(500).send({ message: "Internal Server Error" });
+          });
+      });
+      
 
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
