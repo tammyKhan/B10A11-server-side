@@ -49,6 +49,23 @@ async function run() {
             res.status(500).send({ message: "Internal Server Error" });
           });
       });
+
+      // Get 6 Featured Foods with Highest Quantity
+app.get('/featured-foods', async (req, res) => {
+  try {
+    const featuredFoods = await foodCollection
+      .find()
+      .sort({ quantity: -1 }) // Highest quantity first
+      .limit(6) // Only 6 items
+      .toArray();
+
+    res.send(featuredFoods);
+  } catch (error) {
+    console.error("Error fetching featured foods:", error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
       
 
     // Connect the client to the server	(optional starting in v4.7)
