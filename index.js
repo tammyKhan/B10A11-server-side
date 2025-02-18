@@ -3,7 +3,7 @@ const cors = require('cors')
 const { MongoClient, ServerApiVersion } = require('mongodb')
 require('dotenv').config()
 
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 5000
 const app = express()
 
 app.use(cors())
@@ -66,7 +66,22 @@ app.get('/featured-foods', async (req, res) => {
   }
 });
 
-      
+const { ObjectId } = require('mongodb'); 
+// ✅ Get Food By ID API
+app.get('/food/:id', async (req, res) => {
+  try {
+    const foodId = req.params.id;
+    const query = { _id: new ObjectId(foodId) };
+    
+    const food = await foodCollection.findOne(query);
+    if (!food) return res.status(404).send({ message: "Food Not Found" });
+
+    res.send(food);
+  } catch (error) {
+    console.error("Error fetching food by ID:", error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+});
 
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
