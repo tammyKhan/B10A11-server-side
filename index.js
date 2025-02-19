@@ -3,7 +3,7 @@ const cors = require('cors')
 const { MongoClient, ServerApiVersion } = require('mongodb')
 require('dotenv').config()
 
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 9000
 const app = express()
 
 app.use(cors())
@@ -82,6 +82,49 @@ app.get('/food/:id', async (req, res) => {
     res.status(500).send({ message: "Internal Server Error" });
   }
 });
+
+// Collection for requested foods
+const requestedFoodCollection = db.collection('requestedFoods');
+
+// Request a food
+app.post('/request-food', async (req, res) => {
+  try {
+    const { foodId, userEmail } = req.body;
+
+    // Find the food item by ID
+    const food = await foodCollection.findOne({ _id: new ObjectId(foodId) });
+
+    if (!food) return res.status(404).send({ message: "Food not found" });
+
+    // Change the food status to requested
+    food.status = "requested";
+    food.requestedBy = userEmail;
+
+    // Move food to requestedFoods collection
+    await requestedFoodCollection.insertOne(food);
+
+    // Remove food from available foods
+    await foodCollection.deleteOne({ _id: new ObjectId(foodId) });
+
+    res.send({ message: "Food requested successfully!" });
+  } catch (error) {
+    console.error("Error requesting food:", error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
+// Get requested foods for a user
+app.get('/my-requests', async (req, res) => {
+  try {
+    const userEmail = req.query.email;
+    const myRequests = await requestedFoodCollection.find({ requestedBy: userEmail }).toArray();
+    res.send(myRequests);
+  } catch (error) {
+    console.error("Error fetching requested foods:", error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
 
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
