@@ -2,8 +2,9 @@ const express = require('express')
 const cors = require('cors')
 const { MongoClient, ServerApiVersion } = require('mongodb')
 require('dotenv').config()
+const { ObjectId } = require('mongodb'); 
 
-const port = process.env.PORT || 9000
+const port = process.env.PORT || 5000
 const app = express()
 
 app.use(cors())
@@ -66,7 +67,6 @@ app.get('/featured-foods', async (req, res) => {
   }
 });
 
-const { ObjectId } = require('mongodb'); 
 // ✅ Get Food By ID API
 app.get('/food/:id', async (req, res) => {
   try {
@@ -124,6 +124,40 @@ app.get('/my-requests', async (req, res) => {
     res.status(500).send({ message: "Internal Server Error" });
   }
 });
+
+
+// Get foods added by the logged-in user
+app.get('/my-foods', async (req, res) => {
+  try {
+    const userEmail = req.query.email;
+    const myFoods = await foodCollection.find({ "donator.email": userEmail }).toArray();
+    res.send(myFoods);
+  } catch (error) {
+    console.error("Error fetching user foods:", error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
+// Delete a food item
+app.delete('/foods/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await foodCollection.deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).send({ message: "Food not found" });
+    }
+
+    res.send({ message: "Food deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting food:", error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+});
+
+
+
+
 
 
     // Connect the client to the server	(optional starting in v4.7)
