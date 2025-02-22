@@ -155,10 +155,28 @@ app.delete('/foods/:id', async (req, res) => {
   }
 });
 
+// get a single data by id from db
+app.get('/food/:id', async(req, res) => {
+  const id = req.params.id
+  const query = { _id: new ObjectId(id) }
+  const result = await foodCollection.findOne(query)
+  res.send(result)
+}) 
 
 
-
-
+// Update a food Data in db
+app.put('/update-food/:id', async (req, res) => {
+  const id = req.params.id;
+  const foodData = req.body;
+  const updated = {
+    $set: foodData,
+  }
+  const query = {_id: new ObjectId(id)}
+  const options = {upsert: true}
+  const result = await foodCollection.updateOne(query, updated, options);
+  console.log(result);
+  res.send(result) 
+})
 
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
